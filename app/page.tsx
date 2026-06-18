@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useFamilyTree } from "@/lib/useFamilyTree";
 import { TitlePlate } from "@/components/ui/TitlePlate";
+import { HelpHint } from "@/components/ui/HelpHint";
 import { TreeCanvas } from "@/components/tree/TreeCanvas";
 import { PersonDetail } from "@/components/tree/PersonDetail";
 
@@ -17,9 +18,14 @@ export default function HomePage() {
     <main className="lacquer flex h-screen flex-col overflow-hidden">
       <header className="flex items-center justify-between gap-4 px-6 pb-4 pt-5">
         <TitlePlate title={tree?.title ?? "Ургийн бичиг"} subtitle={tree?.subtitle} />
-        <p className="hidden max-w-[15rem] text-right text-xs leading-relaxed text-gold/70 sm:block">
-          Чирж тойрно · хүрдээр томруулна · картан дээр дарж намтрыг үзнэ
-        </p>
+        <HelpHint
+          items={[
+            "Хоосон зайг чирж модыг тойрно",
+            "Хулганы хүрдээр томруулж жижигрүүлнэ",
+            "Картан дээр дарж тухайн хүний намтрыг үзнэ",
+            "Доод буланд: ＋ томруулах, － жижигрүүлэх, ⤢ бүгдийг харах",
+          ]}
+        />
       </header>
 
       <div className="meander h-3 w-full shrink-0" />

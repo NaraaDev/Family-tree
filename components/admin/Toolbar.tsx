@@ -38,17 +38,27 @@ export function Toolbar({
       </span>
 
       <div className="min-w-[200px] flex-1">
-        <input
-          value={tree.title}
-          onChange={(e) => onTitle(e.target.value)}
-          placeholder="Ургийн бичгийн нэр"
-          className="w-full bg-transparent font-display text-xl tracking-wide text-gold-hi outline-none placeholder:text-gold/30"
-        />
+        <div className="group flex items-center gap-1.5">
+          <input
+            value={tree.title}
+            onChange={(e) => onTitle(e.target.value)}
+            placeholder="Ургийн бичгийн нэр"
+            title="Дарж нэрээ засна"
+            className="w-full border-b border-transparent bg-transparent pb-0.5 font-display text-xl tracking-wide text-gold-hi outline-none transition-colors placeholder:text-gold/30 hover:border-gold-dim/50 focus:border-gold"
+          />
+          <span
+            aria-hidden="true"
+            className="shrink-0 text-gold/40 transition-colors group-focus-within:text-gold group-hover:text-gold/70"
+          >
+            ✎
+          </span>
+        </div>
         <input
           value={tree.subtitle}
           onChange={(e) => onSubtitle(e.target.value)}
           placeholder="Дэд гарчиг (заавал биш)"
-          className="w-full bg-transparent font-display text-xs italic text-gold/80 outline-none placeholder:text-gold/25"
+          title="Дарж дэд гарчгийг засна"
+          className="mt-0.5 w-full border-b border-transparent bg-transparent font-display text-xs italic text-gold/80 outline-none transition-colors placeholder:text-gold/25 hover:border-gold-dim/40 focus:border-gold/70"
         />
       </div>
 

@@ -1,8 +1,10 @@
 // Сонгосон хүнийг засах самбар — талбарууд + харилцаа холбох/таслах + устгах.
 
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import type { FamilyTree, Person } from "@/lib/types";
 import { fullName, listPersons } from "@/lib/tree";
+import { fileToCompressedDataUrl } from "@/lib/image";
+import { Avatar } from "@/components/tree/Avatar";
 
 interface Relation {
   readonly add: { spouse: () => void; child: () => void; parent: () => void };
@@ -57,6 +59,25 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 
 export function PersonEditor({ tree, person, onUpdate, onDelete, onClose, relation }: Props) {
   const [pick, setPick] = useState("");
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function onPickFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // ижил файлыг дахин сонгох боломжтой байлгана
+    if (!file) return;
+    setPhotoError(null);
+    setBusy(true);
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      onUpdate({ photoUrl: dataUrl });
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : "Зураг оруулж чадсангүй");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const candidates = listPersons(tree).filter((p) => p.id !== person.id);
   const parents = person.parentIds.map((id) => tree.persons[id]).filter((p): p is Person => !!p);
   const spouses = person.spouseIds.map((id) => tree.persons[id]).filter((p): p is Person => !!p);
@@ -104,7 +125,40 @@ export function PersonEditor({ tree, person, onUpdate, onDelete, onClose, relati
           <Field label="Нас барсан" value={person.deathYear ?? ""} onChange={(v) => onUpdate({ deathYear: v })} placeholder="—" />
         </div>
 
-        <Field label="Зургийн URL" value={person.photoUrl ?? ""} onChange={(v) => onUpdate({ photoUrl: v })} placeholder="https://…" />
+        <div>
+          <span className={labelCls}>Зураг</span>
+          <div className="mt-1 flex items-center gap-3">
+            <Avatar person={person} size={48} />
+            <div className="flex flex-col gap-1">
+              <label
+                className={[
+                  "cursor-pointer rounded-md border px-3 py-1.5 text-xs transition-colors",
+                  busy
+                    ? "border-gold-dim/30 text-lac-2/50"
+                    : "border-gold-dim/50 bg-felt-hi text-lac-2 hover:border-khoh",
+                ].join(" ")}
+              >
+                {busy ? "Ачааллаж…" : person.photoUrl ? "📷 Зураг солих" : "📷 Зураг оруулах"}
+                <input type="file" accept="image/*" className="hidden" onChange={onPickFile} disabled={busy} />
+              </label>
+              {person.photoUrl ? (
+                <button
+                  onClick={() => onUpdate({ photoUrl: undefined })}
+                  className="text-left text-[11px] text-lac-2/60 hover:text-lac"
+                >
+                  Зургийг устгах
+                </button>
+              ) : null}
+            </div>
+          </div>
+          {photoError ? <p className="mt-1 text-[11px] text-lac">{photoError}</p> : null}
+          <input
+            value={person.photoUrl?.startsWith("data:") ? "" : person.photoUrl ?? ""}
+            onChange={(e) => onUpdate({ photoUrl: e.target.value })}
+            placeholder="эсвэл зургийн URL"
+            className={`${inputCls} text-xs`}
+          />
+        </div>
 
         <label className="block">
           <span className={labelCls}>Тэмдэглэл</span>

@@ -52,14 +52,9 @@ body {
     radial-gradient(140% 120% at 50% -10%, var(--lac-hi) 0%, var(--lac-2) 32%, var(--lac) 72%);
 }
 
-/* Эсгий цагаан талбай — нарийн нэхмэл бүтэцтэй */
+/* Эсгий цагаан талбай — цул цайвар өнгө (хээ/цэггүй) */
 .felt {
   background-color: var(--felt);
-  background-image:
-    linear-gradient(45deg, rgba(154, 122, 52, 0.05) 25%, transparent 25%, transparent 75%, rgba(154, 122, 52, 0.05) 75%),
-    linear-gradient(45deg, rgba(154, 122, 52, 0.05) 25%, transparent 25%, transparent 75%, rgba(154, 122, 52, 0.05) 75%);
-  background-size: 14px 14px;
-  background-position: 0 0, 7px 7px;
 }
 
 /* Алтан хос шугамт хүрээ (сийлбэрийн trim) */

@@ -27,6 +27,7 @@ export function useViewport(contentW: number, contentH: number) {
   const touchedRef = useRef(false);
   const panRef = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
 
+  // Бүгдийг багтаах (тойм) — товчинд.
   const fit = useCallback(() => {
     const el = containerRef.current;
     if (!el || contentW <= 0 || contentH <= 0) return;
@@ -40,10 +41,25 @@ export function useViewport(contentW: number, contentH: number) {
     });
   }, [contentW, contentH]);
 
-  // Анх ачаалах ба агуулгын хэмжээ өөрчлөгдөхөд (хэрэглэгч хараахан хүрээгүй бол) багтаана.
+  // Анхдагч харагдац — уншихад тохиромжтой хэмжээ, орой талаас. Хэт жижгэрэхгүй.
+  const home = useCallback(() => {
+    const el = containerRef.current;
+    if (!el || contentW <= 0 || contentH <= 0) return;
+    const cw = el.clientWidth;
+    const ch = el.clientHeight;
+    const fitScale = Math.min(cw / contentW, ch / contentH);
+    const scale = clamp(Math.max(fitScale, 0.9), MIN, MAX);
+    setVp({
+      scale,
+      tx: (cw - contentW * scale) / 2,
+      ty: contentH * scale <= ch ? (ch - contentH * scale) / 2 : 28,
+    });
+  }, [contentW, contentH]);
+
+  // Анх ачаалах ба агуулгын хэмжээ өөрчлөгдөхөд (хэрэглэгч хараахан хүрээгүй бол).
   useEffect(() => {
-    if (!touchedRef.current) fit();
-  }, [fit]);
+    if (!touchedRef.current) home();
+  }, [home]);
 
   const zoomBy = useCallback((factor: number, px: number, py: number) => {
     touchedRef.current = true;
@@ -106,5 +122,5 @@ export function useViewport(contentW: number, contentH: number) {
     };
   }, []);
 
-  return { containerRef, vp, fit, zoomIn, zoomOut, onWheel, onPanStart, panning };
+  return { containerRef, vp, fit, home, zoomIn, zoomOut, onWheel, onPanStart, panning };
 }

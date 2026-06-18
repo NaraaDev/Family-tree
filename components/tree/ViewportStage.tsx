@@ -27,7 +27,7 @@ function CtrlButton({ label, title, onClick }: { label: string; title: string; o
 }
 
 export function ViewportStage({ width, height, children }: Props) {
-  const { containerRef, vp, fit, zoomIn, zoomOut, onWheel, onPanStart, panning } = useViewport(width, height);
+  const { containerRef, vp, fit, home, zoomIn, zoomOut, onWheel, onPanStart, panning } = useViewport(width, height);
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -56,6 +56,7 @@ export function ViewportStage({ width, height, children }: Props) {
       <div className="absolute bottom-4 right-4 flex flex-col gap-2">
         <CtrlButton label="＋" title="Томруулах" onClick={zoomIn} />
         <CtrlButton label="－" title="Жижигрүүлэх" onClick={zoomOut} />
+        <CtrlButton label="⌂" title="Анхдагч хэмжээ" onClick={home} />
         <CtrlButton label="⤢" title="Бүгдийг харах" onClick={fit} />
       </div>
     </div>

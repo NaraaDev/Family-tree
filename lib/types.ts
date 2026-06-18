@@ -32,6 +32,6 @@ export interface FamilyTree {
 }
 
 export const PERSON_CARD = {
-  width: 168,
-  height: 96,
+  width: 140,
+  height: 158,
 } as const;

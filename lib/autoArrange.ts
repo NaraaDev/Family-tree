@@ -12,7 +12,7 @@ const W = PERSON_CARD.width;
 const SPOUSE_GAP = 36; // хосын хоёр картын зай
 const SIB_GAP = 44; // ах дүүсийн зай
 const ROOT_GAP = 96; // тусдаа язгуур моднуудын зай
-const ROW = 210; // үеийн босоо зай
+const ROW = 264; // үеийн босоо зай (өндөр хөрөгт картад тохируулсан)
 const TOP = 48;
 const LEFT = 48;
 

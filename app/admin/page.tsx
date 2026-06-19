@@ -24,7 +24,7 @@ import { AdminCanvas } from "@/components/admin/AdminCanvas";
 import { PersonEditor } from "@/components/admin/PersonEditor";
 
 export default function AdminPage() {
-  const { tree, ready, commit, preview } = useFamilyTree();
+  const { tree, ready, commit, preview, status } = useFamilyTree();
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [savedAt, setSavedAt] = useState<number | null>(null);
 
@@ -64,11 +64,20 @@ export default function AdminPage() {
     setSelectedId(undefined);
   };
 
+  // autoArrange-ийн байрлалыг модонд тавьж шинэ хувь буцаана (давхцлаас сэргийлнэ).
+  const withArrange = (input: typeof tree) => {
+    const positions = autoArrange(input);
+    let next = input;
+    for (const [id, pos] of Object.entries(positions)) next = movePerson(next, id, pos);
+    return next;
+  };
+
   // — Харилцаа холбох (хурдан барих) —
+  // Нэмсний дараа шууд цэгцэлж байрлуулна — картууд давхцаж зураас бүрхэгдэхгүй.
   const quick = (fn: typeof addSpouseTo) => {
     if (!selectedId) return;
     const { tree: next, id } = fn(tree, selectedId);
-    saveCommit(next);
+    saveCommit(withArrange(next));
     setSelectedId(id);
   };
 
@@ -85,12 +94,7 @@ export default function AdminPage() {
   };
 
   // — Бусад —
-  const onAutoArrange = () => {
-    const positions = autoArrange(tree);
-    let next = tree;
-    for (const [id, pos] of Object.entries(positions)) next = movePerson(next, id, pos);
-    saveCommit(next);
-  };
+  const onAutoArrange = () => saveCommit(withArrange(tree));
 
   const onExport = () => {
     const blob = new Blob([exportTreeJson(tree)], { type: "application/json" });
@@ -122,6 +126,12 @@ export default function AdminPage() {
       />
 
       <div className="meander h-3 w-full shrink-0" />
+
+      {status === "error" && (
+        <div className="shrink-0 bg-red-900/80 px-4 py-2 text-center text-sm text-red-50">
+          ⚠ Серверт хадгалж чадсангүй. Холболтоо шалгана уу — өөрчлөлт дахин хадгалагдахыг оролдоно.
+        </div>
+      )}
 
       <section className="relative flex-1 min-h-0 p-4">
         <div className="gold-frame felt h-full w-full overflow-hidden rounded-lg">

@@ -8,7 +8,6 @@ import { listPersons } from "@/lib/tree";
 import { treeBounds } from "@/lib/layout";
 import { Connections } from "@/components/tree/Connections";
 import { PersonCard } from "@/components/tree/PersonCard";
-import { TreeBackdrop } from "@/components/tree/TreeBackdrop";
 import { ViewportStage } from "@/components/tree/ViewportStage";
 import { useDragNode } from "./useDragNode";
 
@@ -69,7 +68,6 @@ function Stage({
 
   return (
     <>
-      <TreeBackdrop width={width} height={height} />
       <Connections tree={tree} width={width} height={height} />
       {listPersons(tree).map((p) => (
         <PersonCard

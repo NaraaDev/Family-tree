@@ -1,10 +1,8 @@
-// Ургийн модыг localStorage-д хадгалах Repository. Бүх гаднаас орж ирэх
-// өгөгдлийг шалгаж (validate) баталгаажуулна — итгэхгүй.
+// Ургийн модны шалгах (validate) + экспортын туслахууд. Гаднаас орж ирэх
+// бүх өгөгдлийг шалгаж баталгаажуулна — итгэхгүй. (Хадгалалт нь сервер талд:
+// lib/serverStore.ts, client нь lib/treeClient.ts.)
 
 import type { FamilyTree, Person } from "./types";
-import { emptyTree } from "./tree";
-
-const STORAGE_KEY = "family-tree:v1";
 
 function isPoint(v: unknown): v is { x: number; y: number } {
   return (
@@ -61,35 +59,6 @@ export function parseTree(raw: unknown): FamilyTree | null {
   };
 }
 
-export function loadTree(): FamilyTree | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const text = window.localStorage.getItem(STORAGE_KEY);
-    if (!text) return null;
-    return parseTree(JSON.parse(text));
-  } catch (err) {
-    console.error("Ургийн мод уншихад алдаа гарлаа:", err);
-    return null;
-  }
-}
-
-export function saveTree(tree: FamilyTree): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tree));
-    return true;
-  } catch (err) {
-    console.error("Ургийн мод хадгалахад алдаа гарлаа:", err);
-    return false;
-  }
-}
-
 export function exportTreeJson(tree: FamilyTree): string {
   return JSON.stringify(tree, null, 2);
 }
-
-export function loadOrSeed(seed: FamilyTree): FamilyTree {
-  return loadTree() ?? seed ?? emptyTree();
-}
-
-export { STORAGE_KEY };

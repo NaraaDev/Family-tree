@@ -7,7 +7,6 @@ import { listPersons } from "@/lib/tree";
 import { treeBounds } from "@/lib/layout";
 import { Connections } from "./Connections";
 import { PersonCard } from "./PersonCard";
-import { TreeBackdrop } from "./TreeBackdrop";
 import { ViewportStage } from "./ViewportStage";
 
 interface Props {
@@ -23,7 +22,6 @@ export function TreeCanvas({ tree, onSelect, selectedId }: Props) {
     <ViewportStage width={width} height={height}>
       {() => (
         <>
-          <TreeBackdrop width={width} height={height} />
           <Connections tree={tree} width={width} height={height} />
           {listPersons(tree).map((p) => (
             <PersonCard key={p.id} person={p} selected={p.id === selectedId} onSelect={onSelect} />

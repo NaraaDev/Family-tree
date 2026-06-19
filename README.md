@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Гэр бүлийн мод — Family Tree
 
-## Getting Started
+Монгол гэр бүлийн **ургийн модыг** интерактивээр харуулах, засварлах веб апп.
+Газрын зураг шиг чирч (pan) томруулж (zoom) үзэх нийтийн дэлгэц, мөн картыг чирч
+байрлуулах, хүн нэмэх/засах админ самбартай. Бүх хэрэглэгч **нэг ерөнхий модыг**
+хуваалцана (өгөгдөл серверт хадгалагдана).
 
-First, run the development server:
+## Боломжууд
+
+- **Нийтийн харагдац** (`/`) — pan/zoom, хүн дээр дарж намтрыг үзэх.
+- **Админ** (`/admin`) — картыг чирэх, хүн/хань/хүүхэд/эцэг нэмэх, зураг оруулах,
+  «Цэгцлэх» (tidy-tree автомат байрлуулалт), JSON экспорт.
+- **Автомат байрлуулалт** — хүн нэмэх бүрт давхцлыг арилгаж цэгцэлнэ.
+- **Зураг** — хөргийг browser дээр шахаж (max 320px JPEG) tree-д хадгална.
+- **Серверийн хадгалалт** — өгөгдөл болон зургийг сервер дискэн дээрх JSON-д хадгална.
+
+## Технологи
+
+- **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript**
+- **Tailwind CSS v4**
+- Серверийн хадгалалт: дискэн дээрх JSON файл (`data/tree.json`)
+
+## Локал хөгжүүлэлт
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`npm run lint` — eslint · `npm run build` — production build · `npm run start` — production server.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Өгөгдлийн загвар ба хадгалалт
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Бүх хэрэглэгч серверийн нэг модыг хуваалцана. API:
+  - `GET /api/tree` — одоогийн мод (JSON).
+  - `PUT /api/tree` — модыг шалгаж хадгална (POST мөн дэмжинэ — `sendBeacon`-д).
+- Файл байршил: **`data/tree.json`** (анхдагч). Зургууд нь энэ JSON дотор
+  base64-аар багтсан тул тусдаа файл шаардахгүй.
+- Байршлыг `TREE_DATA_DIR` орчны хувьсагчаар өөрчилнө.
+- Client тал: `lib/treeClient.ts` (fetch), `lib/useFamilyTree.ts` (debounce-той
+  хадгалалт, алдаа гарвал автомат дахин оролдоно).
+- Сервер тал: `lib/serverStore.ts` (атомар бичилт, зэрэг бичилтийг дараалуулна).
 
-## Learn More
+### Seed (анхны) өгөгдөл
 
-To learn more about Next.js, take a look at the following resources:
+Анхны мод нь **`12 бүртгэл.xlsx`**-аас үүсгэсэн жинхэнэ өгөгдөл —
+дээд талд «Дээдэс» хос, доор нь **12 өрхийн** удам (нийт ~178 хүн).
+Файл: `lib/sampleData.ts` (`sampleTree()`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Серверт seed-ийг ачаалах 2 арга:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Автоматаар** — шинэ сервер дээр `data/tree.json` байхгүй бол анхны
+   хүсэлтэд `sampleTree()`-ээр үрлэж дискэнд бичнэ.
+2. **Админаас** — `/admin` → «Жишээ модыг сэргээх» товч нь seed-ийг серверт
+   дахин хадгална (одоогийн өөрчлөлтийг дарж бичнэ).
 
-## Deploy on Vercel
+Excel өөрчлөгдвөл seed-ийг дахин үүсгэх:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+node scripts/gen-seed-from-xlsx.mjs    # lib/sampleData.ts-ийг дахин бичнэ
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Production deploy (өөрийн сервер / VPS)
+
+```bash
+npm ci
+npm run build
+PORT=3000 TREE_DATA_DIR=/var/lib/family-tree npm run start
+```
+
+Анхаарах зүйлс:
+
+- **`data/` фолдер (эсвэл `TREE_DATA_DIR`) байнгын дискэн дээр** байх ёстой —
+  энд бүх өгөгдөл, зураг хадгалагдана. Backup хийхэд энэ нэг файлыг хуулна.
+- Docker бол энэ фолдерыг **volume** болгож mount хий:
+  ```bash
+  docker run -p 3000:3000 -e TREE_DATA_DIR=/data -v family-tree-data:/data <image>
+  ```
+- Урд талд **reverse proxy** (Nginx/Caddy) тавьж HTTPS өг.
+- Процессыг `systemd` эсвэл `pm2`-оор тогтвортой ажиллуул.
+- Энэ нь **нэг instance**-д тохирно. Олон instance (scale-out) хэрэгтэй бол
+  `lib/serverStore.ts`-ийг жинхэнэ DB рүү солино (интерфейс нь өөрчлөлтөд бэлэн).
+
+### Жишээ systemd unit
+
+```ini
+[Unit]
+Description=Family Tree
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/family-tree
+Environment=PORT=3000
+Environment=TREE_DATA_DIR=/var/lib/family-tree
+ExecStart=/usr/bin/npm run start
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Төслийн бүтэц
+
+```
+app/
+  page.tsx            # нийтийн харагдац
+  admin/page.tsx      # админ самбар
+  api/tree/route.ts   # GET/PUT/POST — серверийн хадгалалт
+components/
+  tree/               # карт, холбоос, viewport (pan/zoom)
+  admin/              # чирэх, засварлагч, toolbar
+  ui/                 # чимэглэлийн бүрэлдэхүүн
+lib/
+  types.ts            # домэйн төрлүүд
+  tree.ts             # цэвэр функцууд (нэмэх/засах/холбох)
+  builder.ts          # хурдан барих (хань/хүүхэд/эцэг нэмэх)
+  layout.ts           # холбоосын геометр + bounds
+  autoArrange.ts      # tidy-tree автомат байрлуулалт
+  storage.ts          # validate/export
+  serverStore.ts      # дискэн дээрх хадгалалт (сервер)
+  treeClient.ts       # /api/tree fetch (client)
+  useFamilyTree.ts    # ачаалал + debounce хадгалалт hook
+  sampleData.ts       # seed (12 бүртгэл.xlsx-аас)
+scripts/
+  gen-seed-from-xlsx.mjs   # Excel → sampleData.ts генератор
+```
